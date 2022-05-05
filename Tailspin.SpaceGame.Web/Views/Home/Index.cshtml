@@ -1,0 +1,104 @@
+﻿@model TailSpin.SpaceGame.Web.Models.LeaderboardViewModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+<section class="intro">
+    <div class="container">
+        <img class="title" src="/images/space-game-title.svg" alt="Space Game">
+        <p>An example site for learning</p>
+    </div>
+</section>
+<section class="download">
+    <div class="image-cap"></div>
+    <div class="container">
+        <a href="" class="btn btn-default btn-lg" data-toggle="modal" data-target="#pretend-modal">Download game</a>
+    </div>
+</section>
+
+<!-- Screenshots -->
+<section class="screens">
+    <div class="container">
+        <ul>
+            <li><a href="" data-toggle="modal" data-target=".pic-01"><img src="/images/space-game-placeholder.svg" alt=""></a></li>
+            <li><a href="" data-toggle="modal" data-target=".pic-01"><img src="/images/space-game-placeholder.svg" alt=""></a></li>
+            <li><a href="" data-toggle="modal" data-target=".pic-01"><img src="/images/space-game-placeholder.svg" alt=""></a></li>
+            <li><a href="" data-toggle="modal" data-target=".pic-01"><img src="/images/space-game-placeholder.svg" alt=""></a></li>
+        </ul>
+    </div>
+</section>
+
+<!-- About section -->
+<section class="about">
+    <h2>More about Space Game</h2>
+    <p>Space Game is an example website for learning purposes. Check out <a href="https://aka.ms/mslearndevops/">Microsoft Learn</a> to find out more.</p>
+</section>
+<section class="social">
+    <div class="container">
+        <div class="share">
+            <ul>
+                <li><a href="" data-toggle="modal" data-target=".social-media"><img src="/images/space-game-placeholder.svg" alt="" /></a></li>
+                <li><a href="" data-toggle="modal" data-target=".social-media"><img src="/images/space-game-placeholder.svg" alt="" /></a></li>
+                <li><a href="" data-toggle="modal" data-target=".social-media"><img src="/images/space-game-placeholder.svg" alt="" /></a></li>
+            </ul>
+        </div>
+    </div>
+    <p>&copy; @DateTime.Now.Year - TailSpin Toys</p>
+</section>
+
+
+<!-- Modals -->
+<div class="modal fade" id="test-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header no-border">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                modal
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pic modals -->
+<div class="modal fade pic-01" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header no-border">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="/images/space-game-placeholder.svg" width="100%" alt="">
+                <p>Gamescreen example</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Social -->
+<div class="modal fade social-media" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header no-border">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body text-center">
+                Social media example
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dead end modal -->
+<div class="modal fade" id="pretend-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header no-border">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body text-center">
+                This link is for example purposes and goes nowhere. 😐
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,116 @@
+name: $(Build.SourceBranchName).$(date:yyyyMMdd)$(rev:.r)
+trigger:
+- 'main'
+
+variables:
+  leaderboardRepository: 'leaderboard'
+  buildConfiguration: 'Release'
+  webRepository: 'web'
+  tag: '$(Build.BuildId)'
+  imagePullSecret: 'azure-sa-token-tbb4v'
+  SONAR_SCANNER_OPTS: -Xmx4096m
+  NODE_OPTIONS: --max-old-space-size=8192
+
+stages:
+- stage: 'Analysis'
+  displayName: 'Prepare Analysis Configuration' 
+  jobs:
+  - job: 'Analysis'
+    displayName: 'Prepare Analysis Configuration'
+    pool:
+     name: default
+     vmImage: 'ubuntu-20.04'
+    steps:
+    # Configurar Proyecto
+    - task: SonarQubePrepare@5
+      inputs:
+        SonarQube: 'sonarqube'
+        scannerMode: 'CLI'
+        configMode: 'manual'
+        #cliProjectKey: "$(Build.Repository.Name)"
+        #cliProjectName: "$(Build.Repository.Name)"
+        cliProjectName: "$(Build.DefinitionName)"
+        cliProjectKey: "$(Build.DefinitionName)"
+        cliProjectVersion: "$(Build.BuildNumber)"
+        cliSources: '.'
+        extraProperties: |
+          sonar.javascript.node.maxspace=6096
+        
+    # Ejecutar Analisis
+    - task: SonarQubeAnalyze@5
+    # Publish Quality Gate Result task
+    - task: SonarQubePublish@5
+      inputs:
+        pollingTimeoutSec: '300'
+- stage: 'Build'
+  displayName: 'Build and push'
+  jobs:  
+  - job: 'Build'
+    displayName: 'Build job'
+    pool: 
+      name: default
+      vmImage: 'ubuntu-20.04'
+    steps:
+    - task: Docker@2
+      displayName: 'Build and push the image to container registry'
+      inputs:
+        command: buildAndPush
+        buildContext: $(Build.Repository.LocalPath)
+        repository: tazvoit/$(webRepository)
+        dockerfile: '$(Build.SourcesDirectory)/Tailspin.SpaceGame.Web/Dockerfile'
+        containerRegistry: 'dockerRegistryConnection'
+        tags: |
+          $(tag)
+    - task: Docker@2
+      displayName: 'Build and push the leaderboard image to container registry'
+      inputs:
+        command: buildAndPush
+        buildContext: $(Build.Repository.LocalPath)
+        repository: tazvoit/$(leaderboardRepository)
+        dockerfile: '$(Build.SourcesDirectory)/Tailspin.SpaceGame.LeaderboardContainer/Dockerfile'
+        containerRegistry: 'dockerRegistryConnection'
+        tags: |
+          $(tag)
+    - publish: '$(Build.SourcesDirectory)/manifests'
+      artifact: manifests
+      
+- stage: 'Deploy'
+  displayName: 'Deploy the containers'
+  dependsOn: Build
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy
+    pool:
+      name: default
+      vmImage: 'ubuntu-20.04'
+    environment: 'openshift-sandbox-jorge-medina-nuu'
+    variables:
+    - group: Release
+    strategy:
+      runOnce:
+        deploy:
+          steps:          
+          - download: current
+            artifact: manifests
+          - task: KubernetesManifest@0
+            displayName: Create imagePullSecret
+            inputs:
+              action: createSecret
+              secretName: $(imagePullSecret)
+              dockerRegistryEndpoint: 'dockerRegistryConnection'
+              kubernetesServiceConnection: 'openshift-sandbox-jorge-medina-nuu-dev-1651679158430'
+              namespace: 'jorge-medina-nuu-dev'
+          - task: KubernetesManifest@0
+            displayName: Deploy to Kubernetes cluster
+            inputs:
+              action: deploy
+              kubernetesServiceConnection: 'openshift-sandbox-jorge-medina-nuu-dev-1651679158430'
+              namespace: 'jorge-medina-nuu-dev'
+              manifests: |
+                $(Pipeline.Workspace)/manifests/deployment.yml
+                $(Pipeline.Workspace)/manifests/service.yml
+              imagePullSecrets: |
+                $(imagePullSecret)
+              containers: |
+                $(RegistryName)/$(webRepository):$(tag)
+                $(RegistryName)/$(leaderboardRepository):$(tag)
